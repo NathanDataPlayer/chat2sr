@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能数据助手</title>
+    <style>
+        /* 保持原有样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .input-section, .output-section, .result-section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+            min-height: 120px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .execute-btn {
+            background-color: #3498db;
+            margin-top: 5px;
+        }
+        .execute-btn:hover {
+            background-color: #2980b9;
+        }
+        .success-message {
+            color: #2ecc71;
+            margin-top: 5px;
+            display: none;
+            text-align: center;
+        }
+        
+        /* 添加结果表格样式 */
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .result-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .result-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>智能数据助手</h1>
+        
+        <div class="input-section">
+            <label for="user-input">请输入您的需求描述：</label>
+            <textarea id="user-input" placeholder="例如：查询所有年龄大于30岁的用户信息"></textarea>
+            <button id="generate-btn">生成SQL</button>
+        </div>
+        
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在处理，请稍候...</p>
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <div class="output-section">
+            <label for="sql-output">生成的SQL：</label>
+            <pre id="sql-output"></pre>
+            <button id="execute-btn" class="execute-btn">执行SQL</button>
+        </div>
+
+        <div class="result-section">
+            <label for="result-output">执行结果：</label>
+            <div id="result-output"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userInput = document.getElementById('user-input');
+            const generateBtn = document.getElementById('generate-btn');
+            const executeBtn = document.getElementById('execute-btn');
+            const sqlOutput = document.getElementById('sql-output');
+            const resultOutput = document.getElementById('result-output');
+            const loading = document.querySelector('.loading');
+            const errorMessage = document.getElementById('error-message');
+            
+            // 生成SQL的点击事件
+            generateBtn.addEventListener('click', async function() {
+                const query = userInput.value.trim();
+                
+                if (!query) {
+                    showError('请输入需求描述！');
+                    return;
+                }
+                
+                // 重置界面
+                sqlOutput.textContent = '';
+                resultOutput.innerHTML = '';
+                hideError();
+                
+                // 显示加载中
+                loading.style.display = 'block';
+                generateBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('/api/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ user_input: query })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || '生成SQL失败');
+                    }
+                    
+                    sqlOutput.textContent = data.sql || 'API返回了空结果';
+                    
+                } catch (error) {
+                    showError('错误: ' + error.message);
+                } finally {
+                    loading.style.display = 'none';
+                    generateBtn.disabled = false;
+                }
+            });
+            
+            // 执行SQL的点击事件
+            executeBtn.addEventListener('click', async function() {
+                const sql = sqlOutput.textContent;
+                
+                if (!sql || sql === 'API返回了空结果') {
+                    showError('没有可执行的SQL语句！');
+                    return;
+                }
+                
+                // 重置结果区域
+                resultOutput.innerHTML = '';
+                hideError();
+                
+                // 显示加载中
+                loading.style.display = 'block';
+                executeBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('/api/execute', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ sql: sql })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || '执行SQL失败');
+                    }
+                    
+                    // 创建结果表格
+                    if (data.results && data.results.length > 0) {
+                        const table = document.createElement('table');
+                        table.className = 'result-table';
+                        
+                        // 添加表头
+                        const thead = document.createElement('thead');
+                        const headerRow = document.createElement('tr');
+                        Object.keys(data.results[0]).forEach(key => {
+                            const th = document.createElement('th');
+                            th.textContent = key;
+                            headerRow.appendChild(th);
+                        });
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+                        
+                        // 添加数据行
+                        const tbody = document.createElement('tbody');
+                        data.results.forEach(row => {
+                            const tr = document.createElement('tr');
+                            Object.values(row).forEach(value => {
+                                const td = document.createElement('td');
+                                td.textContent = value;
+                                tr.appendChild(td);
+                            });
+                            tbody.appendChild(tr);
+                        });
+                        table.appendChild(tbody);
+                        
+                        resultOutput.appendChild(table);
+                    } else {
+                        resultOutput.textContent = '查询结果为空';
+                    }
+                    
+                } catch (error) {
+                    showError('错误: ' + error.message);
+                } finally {
+                    loading.style.display = 'none';
+                    executeBtn.disabled = false;
+                }
+            });
+            
+            // 显示错误信息
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            // 隐藏错误信息
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+            
+            // 按下Enter键也可以提交
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    generateBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
