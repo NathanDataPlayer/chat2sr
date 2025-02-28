@@ -1,37 +1,53 @@
-# chat2sr
-数据智能助手：通过输入需求自动生成SQL代码，并执行计算和展示结果。让你告别繁杂的取数需求。
+# 数据智能助手chat2sr
 
-对于数据开发同学，经常会遇到临时取数的需求，如果需求一堆积，很容易造成交付不及时。
+一款通过AI自动生成SQL并执行数据分析的工具，帮助你告别繁杂的取数需求。
 
-其实对于这类需求，只要数仓表建设够完善，完全可以借助AI的能力来自动写SQL逻辑并交付结果，做到数据需求的线上智能化。
+## 背景介绍
 
-整个项目的前后端组件：
--前端：H5
--后端：Go
--数据库：Starrocks
--AI引擎：DeepSeek
+数据开发同学经常面临大量临时取数需求，导致交付效率受限。只要数仓表建设完善，我们可以借助AI能力自动生成SQL逻辑并交付结果，实现数据需求的自助智能化。
+
+## 技术架构
+
+- 前端：H5
+- 后端：Go 
+- 数据库：Starrocks
+- AI引擎：DeepSeek
+
+## 功能演示
+
+1. 用户输入数据需求，如"查询2月份订单的平均值"
+   <img width="976" alt="image" src="https://github.com/user-attachments/assets/bf29e8ce-b137-4ce7-9828-178296a44c38" />
+
+2. 系统自动生成对应的SQL代码
+   <img width="988" alt="image" src="https://github.com/user-attachments/assets/58298683-166d-425e-a502-164dd6d6da30" />
+
+3. 点击执行SQL后可展示结果，如有需要可以下载结果
+   <img width="968" alt="image" src="https://github.com/user-attachments/assets/4b7e8f4d-853c-4171-8237-75c1151874db" />
 
 
-基础效果演示:
+## 快速开始
 
-用户端输入数据需求：比如想看 “消费最多的客户”
-<img width="941" alt="image" src="https://github.com/user-attachments/assets/7558914e-d16a-43f7-b019-a9e99b03e3bc" />
+1. 克隆项目到本地
 
-该服务自动生成SQL代码，点击执行SQL，会展示出结果
-<img width="907" alt="image" src="https://github.com/user-attachments/assets/bbf433e7-de51-468a-b358-00ef3d90fbd5" />
+2. 项目目录下配置 .env 文件，修改相关配置信息
+```
+DEEPSEEK_API_KEY=<your_ds_key>
+DB_HOST=<database_host>
+DB_PORT=<database_port>
+DB_USER=<database_user>
+DB_PASSWORD=<database_password>
+DB_NAME=<database_name>
+SERVER_PORT=<service_port>
+```
 
+3. 启动服务:
+```bash
+nohup go run main.go &
+```
 
-项目运行也比较简单：
-只要clone项目到本地，然后修改.env配置文件里面的信息
+4. 访问服务:
+```
+http://yourhost:port
+```
 
-DEEPSEEK_API_KEY=更新为自己的DS KEY
-DB_HOST=DB的Host
-DB_PORT=DB的端口
-DB_USER=DB用户名
-DB_PASSWORD=
-DB_NAME=DB名字
-SERVER_PORT=服务端口
-
-修改完后，直接 nohup go run main.go & 执行即可。
-
-服务起来后，可以在用户端通过http://yourhost:port进行访问
+现在你可以开始使用这个智能数据助手，输入自然语言描述即可自动生成并执行SQL查询。
