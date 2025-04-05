@@ -1,25 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能数据助手</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css">
+    <!-- 添加highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css">
+    <!-- 添加highlight.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <!-- 添加SQL语言支持 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/sql.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple 
--system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
         }
         
         :root {
             --primary-color: #4361ee;
             --primary-light: #4895ef;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f72af;
             --success-color: #2ecc71;
             --error-color: #e74c3c;
             --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e7ec 100%);
             --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border-radius: 12px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
         }
 
         body {
@@ -76,6 +89,17 @@
             color: #2c3e50;
             font-size: 1.1em;
         }
+        
+        .icon-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .icon-label i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
 
         textarea {
             width: 100%;
@@ -129,6 +153,7 @@
             box-shadow: none;
         }
 
+        /* 现有的pre样式 */
         pre {
             background-color: #f8f9fa;
             padding: 20px;
@@ -140,10 +165,89 @@
             font-size: 14px;
             line-height: 1.5;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         pre:hover {
             border-color: var(--primary-light);
+        }
+        
+        /* 添加SQL语法高亮样式 */
+        .sql-keyword {
+            color: #d73a49;
+            font-weight: bold;
+        }
+
+        .sql-function {
+            color: #6f42c1;
+        }
+
+        .sql-number {
+            color: #005cc5;
+        }
+
+        .sql-string {
+            color: #032f62;
+        }
+
+        .sql-operator {
+            color: #d73a49;
+        }
+
+        .sql-comment {
+            color: #6a737d;
+            font-style: italic;
+        }
+
+        .sql-table {
+            color: #22863a;
+        }
+
+        .sql-column {
+            color: #e36209;
+        }
+
+        /* 添加SQL内容容器样式 */
+        .sql-content {
+            width: 100%;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* 添加SQL语法高亮样式 */
+        .sql-keyword {
+            color: #d73a49;
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            opacity: 0;
+            margin-top: 0;
+            padding: 0;
+        }
+
+        pre:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         .loading {
@@ -167,6 +271,7 @@
             animation: spin 1s linear infinite;
         }
 
+        /* 现有的动画 */
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -174,6 +279,79 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 新增动画效果 */
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 添加按钮波纹效果 */
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        
+        /* 为各元素添加动画 */
+        .container {
+            animation: scaleIn 0.5s ease;
+        }
+        
+        h1 {
+            animation: fadeIn 0.7s ease;
+        }
+        
+        .input-section, .output-section, .result-section {
+            animation: fadeIn 0.5s ease backwards;
+        }
+        
+        .input-section {
+            animation-delay: 0.1s;
+        }
+        
+        .output-section {
+            animation-delay: 0.2s;
+        }
+        
+        .result-section {
+            animation-delay: 0.3s;
+        }
+        
+        .icon-label i {
+            animation: slideIn 0.5s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 17px rgba(67, 97, 238, 0.3);
+        }
+        
+        button {
+            position: relative;
+            overflow: hidden;
         }
 
         .error-message {
@@ -199,24 +377,61 @@
             padding: 12px;
             border-radius: 8px;
             background: rgba(46, 204, 113, 0.1);
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.3s ease, pulse 2s infinite ease-in-out;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            margin-top: 10px;
+            font-weight: 600;
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(231, 76, 60, 0.1);
+            animation: fadeIn 0.3s ease, shake 0.5s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
 
-        /* 结果表格样式 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #cbd5e0;
+        }
+
+        /* 结果表格容器样式 - 修改为响应式 */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 结果表格样式 - 修改为自适应 */
         .result-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            margin-top: 15px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            table-layout: auto;
+            min-width: 100%;
         }
 
         .result-table th, .result-table td {
             border: 1px solid #e9ecef;
             padding: 12px 15px;
             text-align: left;
+            white-space: nowrap;
         }
 
         .result-table th {
@@ -238,7 +453,6 @@
 
         .result-table tr:hover {
             background-color: #f1f3f5;
-            transform: scale(1.002);
         }
 
         /* 分页和下载按钮样式 */
@@ -251,6 +465,8 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .pagination {
@@ -327,18 +543,26 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .result-table th, .result-table td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- HTML结构保持不变 -->
     <div class="container">
-        <h1>智能数据助手</h1>
+        <h1><i class="ri-database-2-line"></i> 智能数据助手</h1>
         
         <div class="input-section">
-            <label for="user-input">请输入您的需求描述：</label>
+            <label for="user-input" class="icon-label">
+                <i class="ri-chat-1-line"></i>
+                请输入您的需求描述：
+            </label>
             <textarea id="user-input" placeholder="例如：查询所有年龄大于30岁的用户信息"></textarea>
             <button id="generate-btn">
+                <i class="ri-code-line"></i>
                 <span>生成SQL</span>
             </button>
         </div>
@@ -351,27 +575,45 @@
         <div class="error-message" id="error-message"></div>
         
         <div class="output-section">
-            <label for="sql-output">生成的SQL：</label>
-            <pre id="sql-output"></pre>
+            <label for="sql-output" class="icon-label">
+                <i class="ri-terminal-box-line"></i>
+                生成的SQL：
+            </label>
+            <pre id="sql-output"><div class="copy-btn" id="copy-sql" title="复制SQL"><i class="ri-file-copy-line"></i></div></pre>
             <button id="execute-btn" class="execute-btn">
+                <i class="ri-play-circle-line"></i>
                 <span>执行SQL</span>
             </button>
         </div>
 
         <div class="result-section">
-            <label for="result-output">执行结果：</label>
-            <div id="result-output"></div>
+            <label for="result-output" class="icon-label">
+                <i class="ri-table-line"></i>
+                执行结果：
+            </label>
+            <div id="result-output">
+                <div class="empty-state">
+                    <i class="ri-database-2-line"></i>
+                    <p>执行SQL后将在此处显示结果</p>
+                </div>
+            </div>
             <div class="result-controls" style="display: none;">
                 <div class="pagination">
-                    <button id="prev-page" class="page-btn">&lt; 上一页</button>
+                    <button id="prev-page" class="page-btn">
+                        <i class="ri-arrow-left-s-line"></i> 上一页
+                    </button>
                     <span id="page-info">第 1 页，共 1 页</span>
-                    <button id="next-page" class="page-btn">下一页 &gt;</button>
+                    <button id="next-page" class="page-btn">
+                        下一页 <i class="ri-arrow-right-s-line"></i>
+                    </button>
                 </div>
                 <div class="download-controls">
                     <button id="download-csv" class="download-btn">
+                        <i class="ri-file-text-line"></i>
                         <span>下载 CSV</span>
                     </button>
                     <button id="download-excel" class="download-btn">
+                        <i class="ri-file-excel-line"></i>
                         <span>下载 Excel</span>
                     </button>
                 </div>
@@ -388,10 +630,78 @@
             const resultOutput = document.getElementById('result-output');
             const loading = document.querySelector('.loading');
             const errorMessage = document.getElementById('error-message');
+            const copySqlBtn = document.getElementById('copy-sql');
             
             let currentPage = 1;
             let pageSize = 10;
             let allResults = [];
+            let originalSql = ''; // 存储原始SQL文本
+            
+            // SQL语法高亮函数
+            function highlightSQL(sql) {
+                if (!sql || sql === 'API返回了空结果') return sql;
+                
+                // 创建一个临时元素
+                const tempElement = document.createElement('code');
+                tempElement.className = 'language-sql';
+                tempElement.textContent = sql;
+                
+                // 使用highlight.js进行高亮
+                hljs.highlightElement(tempElement);
+                
+                return tempElement.outerHTML;
+            }
+            
+            // 添加按钮波纹效果
+            function createRipple(event) {
+                // 现有代码保持不变
+                const button = event.currentTarget;
+                
+                const circle = document.createElement('span');
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+                
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+                circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+                circle.classList.add('ripple');
+                
+                const ripple = button.getElementsByClassName('ripple')[0];
+                if (ripple) {
+                    ripple.remove();
+                }
+                
+                button.appendChild(circle);
+            }
+            
+            // 为所有按钮添加波纹效果
+            const buttons = document.getElementsByTagName('button');
+            for (const button of buttons) {
+                button.addEventListener('click', createRipple);
+            }
+            
+            // 添加复制SQL功能
+            copySqlBtn.addEventListener('click', function() {
+                if (originalSql && originalSql.trim() && originalSql !== 'API返回了空结果') {
+                    navigator.clipboard.writeText(originalSql)
+                        .then(() => {
+                            copySqlBtn.innerHTML = '<i class="ri-check-line"></i>';
+                            setTimeout(() => {
+                                copySqlBtn.innerHTML = '<i class="ri-file-copy-line"></i>';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                        });
+                }
+            });
+            
+            
+            // 为输入框添加自动调整高度功能
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
             
             // 分页显示函数
             function displayPage(page, data) {
@@ -412,14 +722,24 @@
                 createTable(pageData);
             }
 
-            // 创建表格函数
+            // 创建表格函数 - 修改为使用表格容器
             function createTable(data) {
                 resultOutput.innerHTML = '';
                 if (!data || data.length === 0) {
-                    resultOutput.textContent = '查询结果为空';
+                    const emptyState = document.createElement('div');
+                    emptyState.className = 'empty-state';
+                    emptyState.innerHTML = `
+                        <i class="ri-inbox-line"></i>
+                        <p>查询结果为空</p>
+                    `;
+                    resultOutput.appendChild(emptyState);
                     return;
                 }
 
+                // 创建表格容器
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-container';
+                
                 const table = document.createElement('table');
                 table.className = 'result-table';
                 
@@ -447,8 +767,28 @@
                 });
                 table.appendChild(tbody);
                 
-                resultOutput.appendChild(table);
+                // 将表格添加到容器中
+                tableContainer.appendChild(table);
+                resultOutput.appendChild(tableContainer);
+                
+                // 调整表格宽度
+                adjustTableWidth();
             }
+            
+            // 调整表格宽度函数
+            function adjustTableWidth() {
+                const tableContainer = document.querySelector('.table-container');
+                if (tableContainer) {
+                    const table = tableContainer.querySelector('.result-table');
+                    if (table) {
+                        // 确保表格容器可以水平滚动
+                        tableContainer.style.overflowX = 'auto';
+                    }
+                }
+            }
+
+            // 窗口大小改变时重新调整表格
+            window.addEventListener('resize', adjustTableWidth);
 
             // 下载 CSV 函数
             function downloadCSV() {
@@ -519,8 +859,14 @@
                 }
                 
                 // 重置界面
-                sqlOutput.textContent = '';
-                resultOutput.innerHTML = '';
+                sqlOutput.innerHTML = '';
+                resultOutput.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ri-database-2-line"></i>
+                        <p>执行SQL后将在此处显示结果</p>
+                    </div>
+                `;
+                document.querySelector('.result-controls').style.display = 'none';
                 hideError();
                 
                 // 显示加载中
@@ -542,7 +888,39 @@
                         throw new Error(data.error || '生成SQL失败');
                     }
                     
-                    sqlOutput.textContent = data.sql || 'API返回了空结果';
+                    if (data.sql) {
+                        originalSql = data.sql; // 保存原始SQL
+                        
+                        // 使用highlight.js高亮SQL
+                        sqlOutput.innerHTML = highlightSQL(data.sql);
+                        
+                        // 添加复制按钮
+                        const copyBtn = document.createElement('div');
+                        copyBtn.className = 'copy-btn';
+                        copyBtn.id = 'copy-sql';
+                        copyBtn.title = '复制SQL';
+                        copyBtn.innerHTML = '<i class="ri-file-copy-line"></i>';
+                        sqlOutput.appendChild(copyBtn);
+                        
+                        // 绑定复制按钮事件
+                        copyBtn.addEventListener('click', function() {
+                            if (originalSql.trim()) {
+                                navigator.clipboard.writeText(originalSql)
+                                    .then(() => {
+                                        this.innerHTML = '<i class="ri-check-line"></i>';
+                                        setTimeout(() => {
+                                            this.innerHTML = '<i class="ri-file-copy-line"></i>';
+                                        }, 2000);
+                                    })
+                                    .catch(err => {
+                                        console.error('复制失败:', err);
+                                    });
+                            }
+                        });
+                    } else {
+                        sqlOutput.textContent = 'API返回了空结果';
+                        originalSql = '';
+                    }
                     
                 } catch (error) {
                     showError('错误: ' + error.message);
@@ -552,9 +930,11 @@
                 }
             });
             
+            
             // 执行SQL的点击事件
-            executeBtn.addEventListener('click', async function() {
-                const sql = sqlOutput.textContent;
+                executeBtn.addEventListener('click', async function() {
+                // 这里使用originalSql变量而不是从DOM中获取文本
+                const sql = originalSql || '';
                 
                 if (!sql || sql === 'API返回了空结果') {
                     showError('没有可执行的SQL语句！');
@@ -578,6 +958,8 @@
                         body: JSON.stringify({ sql: sql })
                     });
                     
+
+                    
                     const data = await response.json();
                     
                     if (!response.ok) {
@@ -590,7 +972,13 @@
                         document.querySelector('.result-controls').style.display = 'flex';
                         displayPage(currentPage, allResults);
                     } else {
-                        resultOutput.textContent = '查询结果为空';
+                        const emptyState = document.createElement('div');
+                        emptyState.className = 'empty-state';
+                        emptyState.innerHTML = `
+                            <i class="ri-inbox-line"></i>
+                            <p>查询结果为空</p>
+                        `;
+                        resultOutput.appendChild(emptyState);
                         document.querySelector('.result-controls').style.display = 'none';
                     }
                     

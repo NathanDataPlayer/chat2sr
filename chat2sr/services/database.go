@@ -7,6 +7,56 @@ import (
     _ "github.com/go-sql-driver/mysql"
 )
 
+// TableInfo 结构体用于存储表信息
+type TableInfo struct {
+    Name    string
+    Comment string
+}
+
+// GetAllTablesWithComments 获取所有表及其注释
+func GetAllTablesWithComments() ([]TableInfo, error) {
+    dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+        config.AppConfig.DBUser,
+        config.AppConfig.DBPassword,
+        config.AppConfig.DBHost,
+        config.AppConfig.DBPort,
+        config.AppConfig.DBName)
+
+    db, err := sql.Open("mysql", dsn)
+    if err != nil {
+        return nil, fmt.Errorf("failed to connect to database: %v", err)
+    }
+    defer db.Close()
+
+    query := `
+        SELECT 
+            TABLE_NAME, 
+            TABLE_COMMENT 
+        FROM 
+            INFORMATION_SCHEMA.TABLES 
+        WHERE 
+            TABLE_SCHEMA = ?
+    `
+    
+    rows, err := db.Query(query, config.AppConfig.DBName)
+    if err != nil {
+        return nil, fmt.Errorf("failed to get tables: %v", err)
+    }
+    defer rows.Close()
+
+    var tables []TableInfo
+    for rows.Next() {
+        var name, comment string
+        if err := rows.Scan(&name, &comment); err != nil {
+            return nil, err
+        }
+        tables = append(tables, TableInfo{Name: name, Comment: comment})
+    }
+
+    return tables, nil
+}
+
+// GetTableSchema 获取表结构
 func GetTableSchema(tableName string) ([]string, error) {
     dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
         config.AppConfig.DBUser,
@@ -30,19 +80,19 @@ func GetTableSchema(tableName string) ([]string, error) {
 
     var columns []string
     for rows.Next() {
-        var field, fieldType, null, key, extra string
-        var defaultValue sql.NullString
-        err := rows.Scan(&field, &fieldType, &null, &key, &defaultValue, &extra)
-        if err != nil {
+        var field, fieldType, null, key, defaultValue, extra sql.NullString
+        if err := rows.Scan(&field, &fieldType, &null, &key, &defaultValue, &extra); err != nil {
             return nil, err
         }
-        columns = append(columns, field)
+        columnDesc := fmt.Sprintf("%s %s", field.String, fieldType.String)
+        columns = append(columns, columnDesc)
     }
 
     return columns, nil
 }
 
-func GetAllTables() ([]string, error) {
+// GetTableSchemaWithComments 获取表结构包括字段注释
+func GetTableSchemaWithComments(tableName string) ([]map[string]string, error) {
     dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
         config.AppConfig.DBUser,
         config.AppConfig.DBPassword,
@@ -56,25 +106,59 @@ func GetAllTables() ([]string, error) {
     }
     defer db.Close()
 
-    rows, err := db.Query("SHOW TABLES")
+    query := `
+        SELECT 
+            COLUMN_NAME,
+            COLUMN_TYPE,
+            COLUMN_COMMENT
+        FROM 
+            INFORMATION_SCHEMA.COLUMNS 
+        WHERE 
+            TABLE_SCHEMA = ? AND TABLE_NAME = ?
+    `
+    
+    rows, err := db.Query(query, config.AppConfig.DBName, tableName)
     if err != nil {
-        return nil, fmt.Errorf("failed to get tables: %v", err)
+        return nil, fmt.Errorf("failed to get schema for table %s: %v", tableName, err)
     }
     defer rows.Close()
 
-    var tables []string
+    var columns []map[string]string
     for rows.Next() {
-        var table string
-        if err := rows.Scan(&table); err != nil {
+        var name, dataType, comment string
+        if err := rows.Scan(&name, &dataType, &comment); err != nil {
             return nil, err
         }
-        tables = append(tables, table)
+        
+        column := map[string]string{
+            "name": name,
+            "type": dataType,
+            "comment": comment,
+        }
+        
+        columns = append(columns, column)
     }
 
-    return tables, nil
+    return columns, nil
 }
 
-func ExecuteSQL(sqlQuery string) ([]map[string]interface{}, error) {
+// GetAllTables 获取所有表
+func GetAllTables() ([]string, error) {
+    tables, err := GetAllTablesWithComments()
+    if err != nil {
+        return nil, err
+    }
+    
+    var tableNames []string
+    for _, table := range tables {
+        tableNames = append(tableNames, table.Name)
+    }
+    
+    return tableNames, nil
+}
+
+// ExecuteSQL 执行SQL查询
+func ExecuteSQL(query string) ([]map[string]interface{}, error) {
     dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
         config.AppConfig.DBUser,
         config.AppConfig.DBPassword,
@@ -88,7 +172,7 @@ func ExecuteSQL(sqlQuery string) ([]map[string]interface{}, error) {
     }
     defer db.Close()
 
-    rows, err := db.Query(sqlQuery)
+    rows, err := db.Query(query)
     if err != nil {
         return nil, fmt.Errorf("failed to execute query: %v", err)
     }
@@ -96,38 +180,32 @@ func ExecuteSQL(sqlQuery string) ([]map[string]interface{}, error) {
 
     columns, err := rows.Columns()
     if err != nil {
-        return nil, fmt.Errorf("failed to get columns: %v", err)
+        return nil, fmt.Errorf("failed to get column names: %v", err)
     }
 
     var results []map[string]interface{}
-    
-    count := len(columns)
-    values := make([]interface{}, count)
-    valuePtrs := make([]interface{}, count)
-    
     for rows.Next() {
-        for i := range columns {
-            valuePtrs[i] = &values[i]
+        values := make([]interface{}, len(columns))
+        pointers := make([]interface{}, len(columns))
+        for i := range values {
+            pointers[i] = &values[i]
         }
-        
-        if err := rows.Scan(valuePtrs...); err != nil {
+
+        if err := rows.Scan(pointers...); err != nil {
             return nil, fmt.Errorf("failed to scan row: %v", err)
         }
-        
+
         row := make(map[string]interface{})
-        for i, col := range columns {
+        for i, column := range columns {
             val := values[i]
-            
-            b, ok := val.([]byte)
-            if ok {
-                row[col] = string(b)
+            if b, ok := val.([]byte); ok {
+                row[column] = string(b)
             } else {
-                row[col] = val
+                row[column] = val
             }
         }
-        
         results = append(results, row)
     }
-    
+
     return results, nil
 }

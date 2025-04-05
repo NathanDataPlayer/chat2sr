@@ -69,3 +69,22 @@ type TableScore struct {
     TableName string
     Score     float64
 }
+
+
+type AnythingLLMChatRequest struct {
+	Message     string   `json:"message"`
+	ChatHistory []string `json:"chatHistory"`
+	WorkspaceId string   `json:"workspaceId"`
+}
+
+type AnythingLLMChatResponse struct {
+	Response string `json:"response"`
+}
+
+type AnythingLLMDocumentRequest struct {
+	Name     string `json:"name"`
+	Content  string `json:"content"`
+	Metadata struct {
+		Source string `json:"source"`
+	} `json:"metadata"`
+}
