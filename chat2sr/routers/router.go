@@ -16,6 +16,7 @@ func SetupRouter() *gin.Engine {
         api.GET("/health", handlers.HandleHealth)
         api.POST("/query", handlers.HandleNLQuery)   
         api.POST("/execute", handlers.HandleExecute)
+        api.POST("/analyze", handlers.HandleAnalysis)
     }
 
     return router

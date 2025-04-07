@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <!-- 添加SQL语言支持 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -271,6 +272,194 @@
             animation: spin 1s linear infinite;
         }
 
+
+        .analysis-output {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            overflow-y: auto;
+            max-height: 400px;
+            border: 2px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+    
+        .analysis-content {
+            white-space: normal !important;
+            word-break: break-word;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+
+
+        .analysis-content h1 {
+                font-size: 1.8em;
+                margin-top: 0.8em;
+                margin-bottom: 0.6em;
+                color: #2c3e50;
+                text-align: left;
+                -webkit-text-fill-color: initial;
+                background: none;
+        }
+
+        .analysis-content h1 {
+            font-size: 1.8em !important;
+            margin-top: 0.8em !important;
+            margin-bottom: 0.6em !important;
+            color: #2c3e50 !important;
+            text-align: left !important;
+            -webkit-text-fill-color: initial !important;
+            background: none !important;
+            font-weight: bold !important;
+            display: block !important;
+        }
+        
+        .analysis-content h2 {
+            font-size: 1.5em !important;
+            margin-top: 0.8em !important;
+            margin-bottom: 0.5em !important;
+            color: #3a56d4 !important;
+            font-weight: bold !important;
+            display: block !important;
+        }
+        
+        .analysis-content h3 {
+            font-size: 1.3em !important;
+            margin-top: 0.7em !important;
+            margin-bottom: 0.4em !important;
+            color: #4361ee !important;
+            font-weight: bold !important;
+            display: block !important;
+        }
+        
+
+        
+
+        .analysis-content p {
+            margin-bottom: 10px !important;
+            display: block !important;
+        }
+        
+        .analysis-content ul, 
+        .analysis-content ol {
+            display: block !important;
+            margin-left: 20px !important;
+            margin-bottom: 16px !important;
+            padding-left: 1em !important;
+            list-style-position: outside !important;
+        }
+
+        .analysis-content ul {
+            list-style-type: disc !important;
+        }
+
+        .analysis-content ol {
+            list-style-type: decimal !important;
+        }
+
+        .analysis-content li {
+            display: list-item !important;
+            margin-bottom: 0.5em !important;
+        }
+
+
+        .analysis-content ul ul,
+        .analysis-content ol ol,
+        .analysis-content ul ol,
+        .analysis-content ol ul {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+
+        /* 强调文本样式 */
+        .analysis-content strong {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .analysis-content em {
+            font-style: italic;
+            color: #4a5568;
+        }
+
+        /* 确保代码块正确显示 */
+        .analysis-content code {
+            background-color: #f1f3f5;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        .analysis-content pre {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            margin: 16px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .analysis-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            white-space: pre;
+        }
+
+        /* 引用样式 */
+        .analysis-content blockquote {
+            border-left: 4px solid #4361ee;
+            padding: 0 16px;
+            margin: 16px 0;
+            color: #4a5568;
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: 0 4px 4px 0;
+        }
+                
+        .analysis-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .analysis-content th, 
+        .analysis-content td {
+            border: 1px solid #e9ecef;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .analysis-content th {
+            background-color: #f8f9fa;
+        }
+    
+        .loading-analysis {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+    
+        .loading-analysis .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+    
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* 现有的动画 */
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -524,6 +713,51 @@
             box-shadow: 0 5px 15px rgba(46, 204, 113, 0.2);
         }
 
+        /* 添加到样式部分，替换重复的分析报告样式 */
+        .copy-btn-analysis {
+                background: linear-gradient(135deg, var(--secondary-color), #5e92f3);
+                color: white;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                width: auto;
+                margin-top: 10px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+        }
+
+        .copy-btn-analysis:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 5px 15px rgba(63, 114, 175, 0.2);
+        }
+
+
+        .analysis-btn {
+            background: linear-gradient(135deg, #3a56d4, #5e92f3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+    
+        .analysis-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(58, 86, 212, 0.2);
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             body {
@@ -597,6 +831,30 @@
                     <p>执行SQL后将在此处显示结果</p>
                 </div>
             </div>
+
+            <button id="generate-analysis-btn" style="display: none; margin-top: 15px;" class="analysis-btn">
+                <i class="ri-bar-chart-line"></i>
+                <span>生成分析报告</span>
+            </button>
+
+            <div id="analysis-container" style="display: none; margin-top: 20px;">
+                <label for="analysis-output" class="icon-label">
+                    <i class="ri-bar-chart-line"></i>
+                    分析报告：
+                </label>
+                <div id="analysis-output" class="analysis-output">
+                    <div class="loading-analysis" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>正在生成分析报告...</p>
+                    </div>
+                    <div class="analysis-content"></div>
+                </div>
+                <button id="copy-analysis-btn" class="copy-btn-analysis">
+                    <i class="ri-file-copy-line"></i>
+                    <span>复制分析报告</span>
+                </button>
+            </div>
+
             <div class="result-controls" style="display: none;">
                 <div class="pagination">
                     <button id="prev-page" class="page-btn">
@@ -623,6 +881,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                headerIds: true,
+                mangle: false,
+                pedantic: false,
+                sanitize: false,
+                smartLists: true,
+                smartypants: true
+            });
             const userInput = document.getElementById('user-input');
             const generateBtn = document.getElementById('generate-btn');
             const executeBtn = document.getElementById('execute-btn');
@@ -631,6 +899,14 @@
             const loading = document.querySelector('.loading');
             const errorMessage = document.getElementById('error-message');
             const copySqlBtn = document.getElementById('copy-sql');
+
+
+            const generateAnalysisBtn = document.getElementById('generate-analysis-btn');
+            const analysisContainer = document.getElementById('analysis-container');
+            const analysisOutput = document.getElementById('analysis-output');
+            const loadingAnalysis = document.querySelector('.loading-analysis');
+            const analysisContent = document.querySelector('.analysis-content');
+            const copyAnalysisBtn = document.getElementById('copy-analysis-btn');
             
             let currentPage = 1;
             let pageSize = 10;
@@ -695,6 +971,24 @@
                         });
                 }
             });
+
+            // 添加复制分析报告按钮的事件监听
+            copyAnalysisBtn.addEventListener('click', function() {
+                const analysisText = analysisContent.textContent || analysisContent.innerText;
+                if (analysisText && analysisText.trim()) {
+                    navigator.clipboard.writeText(analysisText)
+                        .then(() => {
+                            copyAnalysisBtn.innerHTML = '<i class="ri-check-line"></i><span>已复制</span>';
+                            setTimeout(() => {
+                                copyAnalysisBtn.innerHTML = '<i class="ri-file-copy-line"></i><span>复制分析报告</span>';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            showError('复制失败: ' + err);
+                        });
+                }
+            });
+
             
             
             // 为输入框添加自动调整高度功能
@@ -883,51 +1177,78 @@
                     });
                     
                     const data = await response.json();
-                    
-                    if (!response.ok) {
-                        throw new Error(data.error || '生成SQL失败');
-                    }
-                    
-                    if (data.sql) {
-                        originalSql = data.sql; // 保存原始SQL
+
+                    originalSql = data.sql || '';
+        
+                    // 应用SQL高亮并显示
+                    sqlOutput.innerHTML = highlightSQL(data.sql) || '未生成SQL';
+        
+                    // 显示结果
+                    if (data.result) {
+                        resultOutput.innerHTML = '';
                         
-                        // 使用highlight.js高亮SQL
-                        sqlOutput.innerHTML = highlightSQL(data.sql);
-                        
-                        // 添加复制按钮
-                        const copyBtn = document.createElement('div');
-                        copyBtn.className = 'copy-btn';
-                        copyBtn.id = 'copy-sql';
-                        copyBtn.title = '复制SQL';
-                        copyBtn.innerHTML = '<i class="ri-file-copy-line"></i>';
-                        sqlOutput.appendChild(copyBtn);
-                        
-                        // 绑定复制按钮事件
-                        copyBtn.addEventListener('click', function() {
-                            if (originalSql.trim()) {
-                                navigator.clipboard.writeText(originalSql)
-                                    .then(() => {
-                                        this.innerHTML = '<i class="ri-check-line"></i>';
-                                        setTimeout(() => {
-                                            this.innerHTML = '<i class="ri-file-copy-line"></i>';
-                                        }, 2000);
-                                    })
-                                    .catch(err => {
-                                        console.error('复制失败:', err);
-                                    });
-                            }
-                        });
+                        if (Array.isArray(data.result) && data.result.length > 0) {
+                            // 创建表格
+                            const table = document.createElement('table');
+                            table.className = 'result-table';
+                            
+                            // 创建表头
+                            const thead = document.createElement('thead');
+                            const headerRow = document.createElement('tr');
+                            
+                            Object.keys(data.result[0]).forEach(key => {
+                                const th = document.createElement('th');
+                                th.textContent = key;
+                                headerRow.appendChild(th);
+                            });
+                            
+                            thead.appendChild(headerRow);
+                            table.appendChild(thead);
+                            
+                            // 创建表体
+                            const tbody = document.createElement('tbody');
+                            
+                            data.result.forEach(row => {
+                                const tr = document.createElement('tr');
+                                
+                                Object.values(row).forEach(value => {
+                                    const td = document.createElement('td');
+                                    td.textContent = value;
+                                    tr.appendChild(td);
+                                });
+                                
+                                tbody.appendChild(tr);
+                            });
+                            
+                            table.appendChild(tbody);
+                            resultOutput.appendChild(table);
+                            
+                           // 显示生成分析报告按钮
+                            generateAnalysisBtn.style.display = 'block';
+                            // 隐藏分析报告容器
+                            analysisContainer.style.display = 'none';
+                            
+                            // 存储查询和结果数据，供分析报告使用
+                            generateAnalysisBtn.dataset.query = userInput.value;
+                            generateAnalysisBtn.dataset.sql = data.sql;
+                            generateAnalysisBtn.dataset.result = JSON.stringify(data.result);
+                            
+                        } else {
+                            resultOutput.innerHTML = '<p>查询结果为空</p>';
+                            analysisContainer.style.display = 'none';
+                        }
                     } else {
-                        sqlOutput.textContent = 'API返回了空结果';
-                        originalSql = '';
+                        resultOutput.innerHTML = '<p>未返回结果</p>';
+                        analysisContainer.style.display = 'none';
                     }
-                    
                 } catch (error) {
-                    showError('错误: ' + error.message);
+                    showError(`请求失败: ${error.message}`);
                 } finally {
                     loading.style.display = 'none';
                     generateBtn.disabled = false;
                 }
+                    
+                    
             });
             
             
@@ -959,7 +1280,6 @@
                     });
                     
 
-                    
                     const data = await response.json();
                     
                     if (!response.ok) {
@@ -971,6 +1291,16 @@
                         currentPage = 1;
                         document.querySelector('.result-controls').style.display = 'flex';
                         displayPage(currentPage, allResults);
+                        
+                        // 显示生成分析报告按钮
+                        generateAnalysisBtn.style.display = 'block';
+                        // 隐藏分析报告容器
+                        analysisContainer.style.display = 'none';
+                        
+                        // 存储查询和结果数据，供分析报告使用
+                        generateAnalysisBtn.dataset.query = userInput.value;
+                        generateAnalysisBtn.dataset.sql = originalSql;
+                        generateAnalysisBtn.dataset.result = JSON.stringify(allResults);
                     } else {
                         const emptyState = document.createElement('div');
                         emptyState.className = 'empty-state';
@@ -980,6 +1310,8 @@
                         `;
                         resultOutput.appendChild(emptyState);
                         document.querySelector('.result-controls').style.display = 'none';
+                        generateAnalysisBtn.style.display = 'none';
+                        analysisContainer.style.display = 'none';
                     }
                     
                 } catch (error) {
@@ -989,6 +1321,55 @@
                     executeBtn.disabled = false;
                 }
             });
+
+            generateAnalysisBtn.addEventListener('click', async function() {
+                // 显示分析报告容器
+                analysisContainer.style.display = 'block';
+                // 显示加载中
+                loadingAnalysis.style.display = 'flex';
+                analysisContent.innerHTML = '';
+                
+                try {
+                    const query = this.dataset.query;
+                    const sql = this.dataset.sql;
+                    const result = JSON.parse(this.dataset.result);
+                    
+                    const analysisResponse = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            sql: sql,
+                            result: result,
+                            format: 'html'
+                        })
+                    });
+                    
+                    const analysisData = await analysisResponse.json();
+                    
+                    // 隐藏加载中
+                    loadingAnalysis.style.display = 'none';
+                    
+                    // 添加调试信息
+                    console.log('分析报告数据:', analysisData);
+                    
+                    // 显示分析报告
+                    if (analysisData && analysisData.analysis) {
+                        analysisContent.innerHTML = analysisData.analysis;
+                    } else if (analysisData && analysisData.error) {
+                        analysisContent.innerHTML = `<p class="error">分析报告生成失败: ${analysisData.error}</p>`;
+                    } else {
+                        analysisContent.innerHTML = '<p>无法生成分析报告</p>';
+                    }
+                } catch (error) {
+                    console.error('分析报告请求错误:', error);
+                    loadingAnalysis.style.display = 'none';
+                    analysisContent.innerHTML = `<p class="error">分析报告生成失败: ${error.message}</p>`;
+                }
+            });
+
             
             // 显示错误信息
             function showError(message) {
