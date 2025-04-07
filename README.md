@@ -1,7 +1,7 @@
 # 数据智能助手chat2sr
 
 一款通过AI自动生成SQL并执行数据分析的工具，帮助你告别繁杂的取数需求。
-结果支持下载和可视化。
+结果支持下载、可视化和基本的数据分析。
 
 ## 背景介绍
 
@@ -24,6 +24,9 @@
 
 3. 点击执行SQL后可展示结果，如有需要可以下载结果
    <img width="968" alt="image" src="https://github.com/user-attachments/assets/4b7e8f4d-853c-4171-8237-75c1151874db" />
+
+4. 新增分析报告功能，可以对结果进行分析并给出结论
+   <img width="936" alt="image" src="https://github.com/user-attachments/assets/b02c4a8c-9f30-41dd-87b0-9eaa2b1c9793" />
 
 
 ## 快速开始
