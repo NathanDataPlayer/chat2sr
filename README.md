@@ -57,7 +57,8 @@ http://yourhost:port
 现在你可以开始使用这个智能数据助手，输入自然语言描述即可自动生成并执行SQL查询。
 
 
-有任何问题或者想交流的可以加下面微信：
+有任何问题或者想交流的可以加微信：
+
 <img width="245" alt="image" src="https://github.com/user-attachments/assets/7f8e7153-1b55-49cf-b389-600d362ed476" />
 
 
