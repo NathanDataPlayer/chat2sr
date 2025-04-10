@@ -58,6 +58,7 @@ http://yourhost:port
 
 
 有任何问题或者想交流的可以加下面微信：
-![image](https://github.com/user-attachments/assets/214d289c-549d-4f91-9b26-e0f2f2a32166)
+<img width="245" alt="image" src="https://github.com/user-attachments/assets/7f8e7153-1b55-49cf-b389-600d362ed476" />
+
 
 
